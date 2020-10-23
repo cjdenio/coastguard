@@ -5,7 +5,7 @@ const app = new App({
   token: process.env.BOT_TOKEN
 })
 
-app.event('message', async (body) => {
+app.event('message', async body => {
   if (
     (body.event.channel === 'CQPG0EUD8' ||
       body.event.channel === 'C0M8PUPU6') &&
@@ -18,8 +18,10 @@ app.event('message', async (body) => {
         body.event.subtype !== 'message_deleted' &&
         body.event.files === undefined &&
         body.message.text !==
-        `<@${body.message.user}> has joined the channel`) ||
-      body.event.subtype == 'thread_broadcast'
+          `<@${body.message.user}> has joined the channel`) ||
+      body.event.subtype == 'thread_broadcast' ||
+      body.message.text == '' ||
+      !body.message.text
     ) {
       console.log('message should be deleted')
       await app.client.chat.delete({
@@ -35,7 +37,7 @@ app.event('message', async (body) => {
           token: process.env.BOT_TOKEN,
           attachments: [],
           channel: body.event.channel,
-          text: `Ahoy Matey! You posted a message without a file or URL:\n\n"${body.event.text}"\n\nI’ve removed your message, but you can repost a shipped project with a file or URL and I’ll let it be. Let <@U4QAK9SRW> know if you have any questions or if I made a mistake.`,
+          text: `Ahoy matey! You posted a message without a file or URL:\n\n"${body.event.text}"\n\nI’ve removed your message, but you can repost a shipped project with a file or URL and I’ll let it be. Let <@U4QAK9SRW> know if you have any questions or if I made a mistake.`,
           user: body.event.user
         })
       } else {
@@ -52,12 +54,11 @@ app.event('message', async (body) => {
   }
 })
 
-const hasUrl = (message) => (
+const hasUrl = message =>
   new RegExp(
     '([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?'
-  ).test(message)
-);
-
+  ).test(message);
+  
 (async () => {
   await app.start(process.env.PORT || 3000)
   console.log('⚡️ Bolt app is running!')
